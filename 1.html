@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Forever</title>
+    <style>
+        :root {
+            /* 默认浅色模式颜色 */
+            --bg-color: #ffffff;
+            --text-color: #333333;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* 深色模式颜色 */
+                --bg-color: #121212;
+                --text-color: #eeeeee;
+            }
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            transition: background-color 0.5s ease; /* 切换模式时平滑过渡 */
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fallingCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('fallingCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 初始化
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- 配置参数 ---
+        const text = "forever";
+        const fontSize = 24; // 字号加大到了 24px
+        const columns = Math.floor(canvas.width / (fontSize * 0.8)); // 适当加密间距
+        
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.random() * -50; 
+        }
+
+        function draw() {
+            // 获取当前系统的主题色
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const bgColor = isDark ? "rgba(18, 18, 18, 0.1)" : "rgba(255, 255, 255, 0.1)";
+            const textColor = isDark ? "#ffffff" : "#333333";
+
+            // 绘制背景拖尾
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 设置文字样式
+            ctx.fillStyle = textColor;
+            ctx.font = `bold ${fontSize}px "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
+
+            for (let i = 0; i < drops.length; i++) {
+                // 每次随机取一个字母
+                const char = text[Math.floor(Math.random() * text.length)];
+                
+                const x = i * (fontSize * 0.8);
+                const y = drops[i] * fontSize;
+
+                // 稍微增加一点透明度变化，让掉落更有层次感
+                ctx.globalAlpha = Math.random() * 0.5 + 0.5;
+                ctx.fillText(char, x, y);
+
+                if (y > canvas.height && Math.random() > 0.98) {
+                    drops[i] = 0;
+                }
+                drops[i] += 0.8; // 控制掉落速度，0.8 比较优雅
+            }
+        }
+
+        setInterval(draw, 30);
+    </script>
+</body>
+</html>
